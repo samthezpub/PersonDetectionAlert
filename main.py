@@ -1,7 +1,10 @@
 from supervision import detection, Position
 from ultralytics import YOLO
+from playsound import playsound
 import supervision as sv
 import cv2
+
+
 
 cap = cv2.VideoCapture(0)
 model = YOLO('yolov8n.pt')
@@ -10,23 +13,27 @@ def frame_generate():
     ret, frame = cap.read()
     return frame
 
+def play_sound():
+    playsound("alert.wav")
 
+
+# Главная задача - обнаружить человека
 def detect_person(frame, detections):
-    person_found = False
     for _, _, confidence, class_id, _, _ in detections:
         if model.names[class_id] == "person":
             print("Person detected with confidence:", confidence)
             if confidence > 0.7:
-                person_found = True
-            break
-    return person_found
+                play_sound()
 
+
+# Ядро, которое обнаруживает и делает аннотацию
 def detect(frame):
     result = model(frame)[0]
 
     detections = sv.Detections.from_ultralytics(result)
     detect_person(frame, detections)
 
+    # labels можно изменить, отображает названия
     labels = [
         f"{model.names[class_id]}"
         for xyxy, mask, confidence, class_id, tracker_id, data in detections
