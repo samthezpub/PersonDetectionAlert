@@ -1,6 +1,7 @@
 from supervision import detection, Position
 from ultralytics import YOLO
 from playsound import playsound
+from datetime import datetime, time
 import supervision as sv
 import cv2
 import threading
@@ -9,6 +10,10 @@ import threading
 
 cap = cv2.VideoCapture(0)
 model = YOLO('yolov8n.pt')
+
+# Устанавливаем диапазон времени
+START_TIME = time(22, 0)
+END_TIME = time(23, 59)
 
 # Флаг для управления основным циклом
 running = True
@@ -22,6 +27,17 @@ def frame_generate():
 def play_sound():
     playsound("alert.wav")
 
+def check_time_range():
+    # Получаем текущее время
+    current_time = datetime.now().time()
+    print(current_time)
+
+    # Проверяем, попадает ли текущее время в диапазон
+    if START_TIME <= current_time <= END_TIME:
+        return True
+    else:
+        return False
+
 
 # Главная задача - обнаружить человека
 def detect_person(frame, detections):
@@ -31,8 +47,9 @@ def detect_person(frame, detections):
             print("Person detected with confidence:", confidence)
             if confidence > 0.7:
                 if sound_thread is None or not sound_thread.is_alive():
-                    sound_thread = threading.Thread(target=play_sound)
-                    sound_thread.start()
+                    if check_time_range():
+                        sound_thread = threading.Thread(target=play_sound)
+                        sound_thread.start()
 
 
 # Ядро, которое обнаруживает и делает аннотацию
