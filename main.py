@@ -43,10 +43,15 @@ def detect(frame):
     detect_person(frame, detections)
 
     # labels можно изменить, отображает названия
-    labels = [
-        f"{model.names[class_id]}"
-        for xyxy, mask, confidence, class_id, tracker_id, data in detections
-    ]
+    try:
+        labels = [
+            f"{model.names[class_id]}"
+            for xyxy, mask, confidence, class_id, tracker_id, data in detections
+        ]
+    except ValueError:
+        labels = [
+            f"Error"
+        ]
 
     box_annotator = sv.BoxAnnotator(
         thickness=2
